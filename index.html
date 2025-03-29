@@ -196,12 +196,15 @@
         display: block;
     }
     .nav-toggle {
-        display: block;
-        font-size: 24px;
-        color: white;
-        cursor: pointer;
-        z-index: 1001; /* Ensure it's above navbar */
-    }
+    display: block; /* Hidden by default */
+    position: absolute;
+    top: 15px; /* Align with navbar padding */
+    right: 30px; /* Align with navbar padding */
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    z-index: 1001; /* Ensure it's above other elements */
+}
     .nav-links.active-nav {
         display: flex;
         flex-direction: column;
@@ -385,9 +388,24 @@
             canvas.height = window.innerHeight;
             init();
         });
-        function toggleNav() {
-    document.querySelector(".nav-links").classList.toggle("active-nav");
-}
+        
+document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.querySelector(".nav-toggle");
+        const navLinks = document.querySelector(".nav-links");
+        const links = document.querySelectorAll(".nav-links a");
+
+        // Toggle the menu on click
+        toggleBtn.addEventListener("click", function () {
+            navLinks.classList.toggle("active-nav");
+        });
+
+        // Close menu when a link is clicked
+        links.forEach(link => {
+            link.addEventListener("click", function () {
+                navLinks.classList.remove("active-nav");
+            });
+        });
+    });
 
 </script>
 </html>
