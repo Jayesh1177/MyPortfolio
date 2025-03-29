@@ -15,19 +15,25 @@
             color: #00ffff;
             text-align: center;
             overflow-x: hidden;
+            overflow-y: auto; /* Allows vertical scrolling */
             position: relative;
+            min-height: 100vh;
+            font-family: 'Oswald', sans-serif;
         }
+
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 30px;
-            background: black;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
             position: fixed;
             width: 100%;
             top: 0;
             left: 0;
             z-index: 1000;
+            transition: background 0.3s ease-in-out;
         }
         .logo {
             font-family: 'Dancing Script', cursive;
@@ -76,6 +82,13 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        html, body {
+            height: 100%;
+            overflow: auto;
+            overflow-y: auto;
         }
         .header-container h2 {
             font-family: 'Oswald', sans-serif;
@@ -84,8 +97,8 @@
             color: white;
             position: relative;
             z-index: 2;
-            margin-bottom: 30px;
-            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-top: 30px;
         }
         .header-container p {
             font-size: 18px;
@@ -94,7 +107,16 @@
             max-width: 800px;
             position: relative;
             z-index: 2;
-            margin-top: -20px;
+            margin-top: -10px;
+        }
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
         }
         .cursor {
             width: 10px;
@@ -128,19 +150,76 @@
             }
         }
         .box1{
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px;
-    width: 200px;
-    float: left;
-    text-align: center;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            float: left;
+            text-align: center;
+        }
+        .img-fluid{
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        body {
+            background: black;
+            color: #00ffff;
+            text-align: center;
+            position: relative;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        width: 100%;
+        display: none;
+        text-align: center;
+        padding: 10px 0;
+    }
+    .nav-links a {
+        padding: 15px;
+        display: block;
+    }
+    .nav-toggle {
+        display: block;
+        font-size: 24px;
+        color: white;
+        cursor: pointer;
+        z-index: 1001; /* Ensure it's above navbar */
+    }
+    .nav-links.active-nav {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header-container {
+        padding-top: 320px; /* Pushes content below navbar */
+    }
+    img {
+        margin-top: 10px; /* Adjust image spacing */
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
 }
-.img-fluid{
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+
     </style>
 </head>
 <body>
@@ -160,7 +239,7 @@
     <div class="header-container" id="home">
         <img src="jayesh.jpg" alt="Jayesh Khaire" 
     style="width: 200px; height: 200px; border-radius: 50%; 
-           margin-top: -25px; box-shadow: 0px 0px 15px rgb(0, 0, 0); object-fit: cover;">
+           margin-top: -150px; box-shadow: 0px 0px 15px rgb(0, 0, 0); object-fit: cover;">
         <h2>MY NAME IS</h2>
         <h1 style="font-family: 'Oswald', sans-serif; font-size: 90px; font-weight: bold; color: #00ffff; margin-top: -8px;">JAYESH KHAIRE</h1>
         <p>Passionate MERN Stack Developer | Blockchain Enthusiast | AI & Prompt Engineer</p>
@@ -201,6 +280,8 @@
         <p>LinkedIn: <a href="https://www.linkedin.com/in/jayesh-khaire" target="_blank" style="color: #00ffff; text-decoration: none;">linkedin.com/in/jayesh-khaire</a></p>
         <p>GitHub: <a href="https://github.com/Jayesh1177" target="_blank" style="color: #00ffff; text-decoration: none;">github.com/Jayesh1177</a></p>
     </div> 
+     <canvas id="particles"></canvas>
+     <div class="nav-toggle" onclick="toggleNav()">☰</div>
 </body>
 <script>
     const cursor = document.getElementById("cursor");
@@ -250,5 +331,63 @@
             }
         });
     });
+     const canvas = document.getElementById("particles");
+        const ctx = canvas.getContext("2d");
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let particlesArray = [];
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1; // Smaller size
+                this.speedX = (Math.random() * 2 - 1) * 0.5;
+                this.speedY = (Math.random() * 2 - 1) * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x <= 0 || this.x >= canvas.width) this.speedX *= -1;
+                if (this.y <= 0 || this.y >= canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = "rgba(0, 255, 255, 0.6)";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function init() {
+            particlesArray = [];
+            for (let i = 0; i < 100; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesArray.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        
+        init();
+        animate();
+        
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+        function toggleNav() {
+    document.querySelector(".nav-links").classList.toggle("active-nav");
+}
+
 </script>
 </html>
